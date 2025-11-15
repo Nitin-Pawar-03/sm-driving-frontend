@@ -1,0 +1,146 @@
+/* Admin.css */
+
+.admin-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container h1,
+.admin-container h2 {
+  text-align: center;
+  color: #333;
+}
+
+.admin-menu {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-menu button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  transition: 0.3s;
+}
+
+.admin-menu button:hover {
+  background-color: #0056b3;
+}
+
+.admin-container input[type="text"],
+.admin-container input[type="password"],
+.admin-container input[type="file"] {
+  padding: 8px 10px;
+  margin: 5px 0;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.admin-container button {
+  padding: 8px 15px;
+  margin: 5px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  transition: 0.3s;
+}
+
+.admin-container button:hover {
+  background-color: #218838;
+}
+
+.inquiries-section,
+.services-section,
+.slider-section {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+table th,
+table td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+table th {
+  background-color: #007bff;
+  color: white;
+}
+
+table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table img {
+  border-radius: 6px;
+}
+
+.slider-section div img {
+  transition: 0.3s;
+}
+
+.slider-section div img:hover {
+  transform: scale(1.05);
+}
+
+.slider-section div button {
+  background-color: red;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="file"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+
+/* ================================
+   FIXED SIZE FOR SERVICE IMAGES
+   ================================ */
+.service-image-fixed {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* ================================
+   FIXED SIZE FOR SLIDER IMAGES
+   ================================ */
+.slider-image-fixed {
+  width: 150px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}

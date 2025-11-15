@@ -1,0 +1,19 @@
+.home {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.banner {
+  background-color: #f0f8ff;
+  padding: 100px 20px;
+}
+
+.banner h1 {
+  font-size: 36px;
+  color: #1e90ff;
+}
+
+.banner p {
+  font-size: 20px;
+  margin-top: 15px;
+}

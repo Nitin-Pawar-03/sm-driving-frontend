@@ -1,0 +1,79 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 40px;
+  background: linear-gradient(90deg, #0066ff, #0099ff);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Left Logo */
+.navbar-left {
+  position: absolute;
+  left: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 45px;
+  width: 45px;
+  border-radius: 50%;    /* Make circle */
+  object-fit: cover;
+}
+
+/* Center Title */
+.logo-text {
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+}
+
+/* Right side menu */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 24px;
+  position: absolute;
+  right: 40px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover Animation */
+.nav-links li a:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.logout-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}

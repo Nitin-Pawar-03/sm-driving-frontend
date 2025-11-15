@@ -1,0 +1,144 @@
+.services {
+  text-align: center;
+  padding: 50px 20px;
+  font-family: Arial, sans-serif;
+}
+
+.services h2 {
+  font-size: 32px;
+  color: #1e90ff;
+  margin-bottom: 40px;
+}
+
+/* Service Cards Layout */
+.service-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Individual Card */
+.card {
+  background-color: #f0f8ff;
+  padding: 25px 40px;
+  border-radius: 10px;
+  font-size: 18px;
+  color: #1e90ff;
+  font-weight: 500;
+  width: 260px;                    /* ✔ same width for all cards */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+/* Card Hover Effect */
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* ⭐ SAME SIZE IMAGES FOR ALL SERVICES */
+.service-image {
+  width: 100%;
+  height: 180px;                   /* ✔ Fixed same height */
+  object-fit: cover;               /* ✔ Crops image nicely */
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Service Details Box */
+.service-details {
+  margin-top: 30px;
+  padding: 20px;
+  border: 2px solid #007bff;
+  border-radius: 10px;
+  background-color: #f9f9ff;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.service-details h3 {
+  color: #007bff;
+}
+
+.service-details pre {
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+/* ===================== */
+/* Modal Styles          */
+/* ===================== */
+
+/* Overlay background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Box */
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.modal-content h3 {
+  color: #007bff;
+}
+
+.modal-content pre {
+  white-space: pre-wrap;
+}
+
+.modal-content button {
+  margin-top: 15px;
+  padding: 8px 15px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+/* Book Now Button */
+.book-btn {
+  background-color: #28a745 !important;
+  color: white !important;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+}
+
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;  /* Left & Right */
+  margin-top: 15px;
+}
+
+.modal-buttons button {
+  padding: 8px 15px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+}
+
+.book-btn {
+  background-color: #28a745 !important; /* Green Book Now */
+}
