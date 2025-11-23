@@ -4,10 +4,9 @@ import "./Services.css";
 
 const BACKEND_URL = "https://sm-driving-backend.onrender.com";
 
-
 function Services() {
   const [selectedService, setSelectedService] = useState(null);
-  const [services, setServices] = useState([]); 
+  const [services, setServices] = useState([]);
   const navigate = useNavigate();
 
   const fetchServices = async () => {
@@ -25,8 +24,8 @@ function Services() {
   }, []);
 
   const handleBookNow = () => {
-    setSelectedService(null); 
-    navigate("/contact"); 
+    setSelectedService(null);
+    navigate("/contact");
   };
 
   return (
@@ -38,11 +37,12 @@ function Services() {
           <div className="card" key={service._id}>
             <strong>{service.serviceName}</strong>
 
+            {/* FIXED IMAGE FIELD */}
             {service.imageURL && (
               <img
                 src={service.imageURL}
                 alt={service.serviceName}
-                className="service-image"   // 👈 Added uniform image class
+                className="service-image"
               />
             )}
 
@@ -58,9 +58,13 @@ function Services() {
 
       {selectedService && (
         <div className="modal-overlay" onClick={() => setSelectedService(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3>{selectedService.serviceName}</h3>
 
+            {/* DETAILS */}
             <p><strong>Documents Required:</strong> {selectedService.documents}</p>
             <p><strong>Price:</strong> {selectedService.price}</p>
             <p><strong>Duration:</strong> {selectedService.duration}</p>

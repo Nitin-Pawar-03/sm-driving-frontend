@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from "react";
 
-const BACKEND_URL = "https://sm-driving-backend.onrender.com";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_BASE_URL || "https://sm-driving-backend.onrender.com";
 
 function AdminSlider() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch existing images
+  // Fetch all slider images
   const fetchImages = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/images`);
+      setLoading(true);
+      const res = await fetch(`${BACKEND_URL}/slider-images`);
+      if (!res.ok) {
+        console.error("Failed to fetch slider images", res.status);
+        setImages([]);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
-      setImages(data.images);
+      setImages(Array.isArray(data.images) ? data.images : []);
     } catch (err) {
       console.error("Error fetching images:", err);
+      setImages([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -21,16 +32,17 @@ function AdminSlider() {
     fetchImages();
   }, []);
 
-  // Upload image
+  // Upload an image
   const handleUpload = async () => {
     if (!selectedFile) return alert("Please select an image first!");
-    if (images.length >= 5) return alert("Maximum 5 images allowed for the slider.");
+    if (images.length >= 5) return alert("Maximum 5 slider images allowed!");
 
     const formData = new FormData();
     formData.append("file", selectedFile);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/upload-image`, {
+      setLoading(true);
+      const res = await fetch(`${BACKEND_URL}/slider-images/upload`, {
         method: "POST",
         body: formData,
       });
@@ -41,30 +53,38 @@ function AdminSlider() {
         fetchImages();
       } else {
         alert("Image upload failed!");
+        console.error(await res.text());
       }
     } catch (err) {
-      console.error("Error uploading image:", err);
+      console.error("Upload error:", err);
+      alert("Upload failed!");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Delete image
-  const handleDelete = async (url) => {
-    const filename = url.split("/").pop();
-    if (!window.confirm(`Are you sure you want to delete "${filename}"?`)) return;
+  // Delete an image
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this image?")) return;
 
     try {
-      const res = await fetch(`${BACKEND_URL}/delete-image/${filename}`, {
+      setLoading(true);
+      const res = await fetch(`${BACKEND_URL}/slider-images/${id}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        alert("Image deleted successfully!");
+        alert("Image deleted!");
         fetchImages();
       } else {
-        alert("Failed to delete image.");
+        alert("Delete failed!");
+        console.error(await res.text());
       }
     } catch (err) {
-      console.error("Error deleting image:", err);
+      console.error("Delete error:", err);
+      alert("Error deleting image.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,15 +98,19 @@ function AdminSlider() {
         onChange={(e) => setSelectedFile(e.target.files[0])}
         style={{ marginRight: "10px" }}
       />
-      <button onClick={handleUpload} style={{ padding: "5px 15px", cursor: "pointer" }}>
-        Upload
+      <button
+        onClick={handleUpload}
+        disabled={loading}
+        style={{ padding: "6px 15px", cursor: "pointer" }}
+      >
+        {loading ? "Working..." : "Upload"}
       </button>
 
       <p style={{ color: "#888", marginTop: "10px" }}>
-        (Maximum 5 images allowed in slider)
+        (Maximum 5 images allowed)
       </p>
 
-      {/* Image Gallery */}
+      {/* Gallery */}
       <div
         style={{
           marginTop: "25px",
@@ -96,38 +120,45 @@ function AdminSlider() {
           gap: "20px",
         }}
       >
-        {images.map((url, index) => (
-          <div key={index} style={{ position: "relative" }}>
-            <img
-              src={url}
-              alt={`slide-${index}`}
-              width="200"
-              height="120"
-              style={{
-                borderRadius: "8px",
-                border: "2px solid #ccc",
-                objectFit: "cover",
-              }}
-            />
-            <button
-              onClick={() => handleDelete(url)}
-              style={{
-                position: "absolute",
-                top: "-10px",
-                right: "-10px",
-                backgroundColor: "red",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: "25px",
-                height: "25px",
-                cursor: "pointer",
-              }}
-            >
-              ×
-            </button>
+        {Array.isArray(images) && images.length > 0 ? (
+          images.map((img) => (
+            <div key={img._id} style={{ position: "relative" }}>
+              <img
+                src={img.url}
+                alt="slider"
+                width="200"
+                height="120"
+                style={{
+                  borderRadius: "8px",
+                  border: "2px solid #ccc",
+                  objectFit: "cover",
+                }}
+              />
+
+              <button
+                onClick={() => handleDelete(img._id)}
+                style={{
+                  position: "absolute",
+                  top: "-10px",
+                  right: "-10px",
+                  backgroundColor: "red",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "25px",
+                  height: "25px",
+                  cursor: "pointer",
+                }}
+              >
+                ×
+              </button>
+            </div>
+          ))
+        ) : (
+          <div style={{ color: "#888" }}>
+            {loading ? "Loading images..." : "No images uploaded yet"}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

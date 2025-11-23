@@ -4,16 +4,35 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "./Home.css";
 
-const BACKEND_URL = "https://sm-driving-backend.onrender.com";
-
+const BACKEND_URL = process.env.REACT_APP_BACKEND_BASE_URL || "https://sm-driving-backend.onrender.com";
 
 function Home() {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/images`)
-      .then((res) => res.json())
-      .then((data) => setImages(data.images));
+    async function loadSliderImages() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/slider-images`);
+        if (!res.ok) {
+          console.error("Failed to fetch slider images");
+          setImages([]);
+          return;
+        }
+
+        const data = await res.json();
+
+        // Extract the URL field from each document
+        const urls =
+          Array.isArray(data.images) ? data.images.map((img) => img.url) : [];
+
+        setImages(urls);
+      } catch (err) {
+        console.error("Slider fetch error:", err);
+        setImages([]);
+      }
+    }
+
+    loadSliderImages();
   }, []);
 
   const settings = {
@@ -29,15 +48,27 @@ function Home() {
   return (
     <div className="home">
       <Slider {...settings}>
-        {images.map((url, index) => (
-          <div key={index}>
-            <img
-              src={url}
-              alt={`slide-${index}`}
-             style={{width: "75%",height: "300px",objectFit: "cover",display: "block",margin: "0 auto"}}
-            />
+        {images.length > 0 ? (
+          images.map((url, index) => (
+            <div key={index}>
+              <img
+                src={url}
+                alt={`slide-${index}`}
+                style={{
+                  width: "75%",
+                  height: "300px",
+                  objectFit: "cover",
+                  display: "block",
+                  margin: "0 auto",
+                }}
+              />
+            </div>
+          ))
+        ) : (
+          <div style={{ textAlign: "center", padding: "40px", color: "#555" }}>
+            Loading slider...
           </div>
-        ))}
+        )}
       </Slider>
 
       <div className="banner">
