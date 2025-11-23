@@ -4,20 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 function Admin() {
   const BACKEND_URL = "https://sm-driving-backend.onrender.com";
 
-  // ========== STATE ==========
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginUsername, setLoginUsername] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-
-  const [activeSection, setActiveSection] = useState(null);
-
-  // Inquiry State
   const [inquiries, setInquiries] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const inquiriesPerPage = 5;
 
-  // Services State
   const [services, setServices] = useState([]);
   const [serviceName, setServiceName] = useState("");
   const [documents, setDocuments] = useState("");
@@ -25,27 +16,31 @@ function Admin() {
   const [duration, setDuration] = useState("");
   const [description, setDescription] = useState("");
   const [imageURL, setImageURL] = useState("");
+
   const [serviceImageFile, setServiceImageFile] = useState(null);
 
-  // Slider State
+  // Slider Images
   const [sliderImages, setSliderImages] = useState([]);
   const [sliderFile, setSliderFile] = useState(null);
 
-  // ========== LOGIN ==========
+  const [activeSection, setActiveSection] = useState(null);
+
+  // Login state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  // LOGIN
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!loginUsername || !loginPassword)
-      return alert("Enter username & password");
+    if (!loginUsername || !loginPassword) return alert("Enter username & password");
 
     try {
       const res = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: loginUsername,
-          password: loginPassword,
-        }),
+        body: JSON.stringify({ username: loginUsername, password: loginPassword }),
       });
 
       const data = await res.json();
@@ -55,17 +50,18 @@ function Admin() {
         setIsLoggedIn(true);
         localStorage.setItem("adminLoggedIn", "true");
       } else {
-        alert(data.detail || "Invalid login");
+        alert(data.detail || "Login failed");
       }
-    } catch (error) {
-      alert("Error logging in");
+    } catch (err) {
+      alert("Login error");
+      console.log(err);
     }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    setActiveSection(null);
     localStorage.removeItem("adminLoggedIn");
+    setActiveSection(null);
   };
 
   useEffect(() => {
@@ -74,69 +70,83 @@ function Admin() {
     }
   }, []);
 
-  // ========== FETCH INQUIRIES ==========
+  // --------------------------
+  // FETCH INQUIRIES
+  // --------------------------
   const fetchInquiries = useCallback(async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/inquiries`);
       const data = await res.json();
       setInquiries(data);
-    } catch (err) {}
+    } catch (err) {
+      console.log("Inquiry fetch error:", err);
+    }
   }, []);
 
   const deleteInquiry = async (id) => {
     try {
       await fetch(`${BACKEND_URL}/inquiry/${id}`, { method: "DELETE" });
       fetchInquiries();
-    } catch {}
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  // ========== FETCH SERVICES ==========
+  // --------------------------
+  // FETCH SERVICES
+  // --------------------------
   const fetchServices = useCallback(async () => {
-    const res = await fetch(`${BACKEND_URL}/services`);
-    setServices(await res.json());
+    try {
+      const res = await fetch(`${BACKEND_URL}/services`);
+      const data = await res.json();
+      setServices(data);
+    } catch (err) {
+      console.log("Service fetch error:", err);
+    }
   }, []);
 
   const addService = async () => {
-    if (!serviceName || !documents || !price || !duration || !description)
+    if (!serviceName || !documents || !price || !duration || !description) {
       return alert("Fill all fields");
-
-    let finalUrl = imageURL;
-
-    if (serviceImageFile) {
-      const formData = new FormData();
-      formData.append("file", serviceImageFile);
-
-      const uploadRes = await fetch(`${BACKEND_URL}/upload-service-image`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await uploadRes.json();
-      finalUrl = data.image_url;
     }
 
-    await fetch(`${BACKEND_URL}/service`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        serviceName,
-        documents,
-        price,
-        duration,
-        description,
-        imageURL: finalUrl,
-      }),
-    });
+    try {
+      let finalImageURL = imageURL;
 
-    fetchServices();
+      // Upload if file selected
+      if (serviceImageFile) {
+        const formData = new FormData();
+        formData.append("file", serviceImageFile);
 
-    setServiceName("");
-    setDocuments("");
-    setPrice("");
-    setDuration("");
-    setDescription("");
-    setImageURL("");
-    setServiceImageFile(null);
+        const upload = await fetch(`${BACKEND_URL}/upload-service-image`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const uploadData = await upload.json();
+        finalImageURL = uploadData.image_url;
+      }
+
+      const res = await fetch(`${BACKEND_URL}/service`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serviceName,
+          documents,
+          price,
+          duration,
+          description,
+          imageURL: finalImageURL,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Service added");
+        fetchServices();
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const deleteService = async (id) => {
@@ -144,18 +154,22 @@ function Admin() {
     fetchServices();
   };
 
-  // ========== SLIDER IMAGES (CLOUDINARY) ==========
+  // --------------------------
+  // SLIDER IMAGES
+  // --------------------------
   const fetchSliderImages = useCallback(async () => {
-    const res = await fetch(`${BACKEND_URL}/slider-images`);
-    const data = await res.json();
-
-    setSliderImages(Array.isArray(data.images) ? data.images : []);
+    try {
+      const res = await fetch(`${BACKEND_URL}/slider-images`);
+      const data = await res.json();
+      setSliderImages(data.images || []);
+    } catch (err) {
+      console.log("Slider fetch error:", err);
+    }
   }, []);
 
   const uploadSliderImage = async () => {
     if (!sliderFile) return alert("Select an image");
-    if (sliderImages.length >= 5)
-      return alert("Maximum 5 slider images allowed");
+    if (sliderImages.length >= 5) return alert("Max 5 allowed");
 
     const formData = new FormData();
     formData.append("file", sliderFile);
@@ -165,51 +179,42 @@ function Admin() {
       body: formData,
     });
 
-    setSliderFile(null);
     fetchSliderImages();
   };
 
   const deleteSliderImage = async (id) => {
-    if (!window.confirm("Delete this image permanently?")) return;
-
     await fetch(`${BACKEND_URL}/slider-images/${id}`, { method: "DELETE" });
+
     fetchSliderImages();
   };
 
-  // ========== LOAD DATA WHEN SECTION SELECTED ==========
   useEffect(() => {
     if (!isLoggedIn) return;
-
     if (activeSection === "inquiries") fetchInquiries();
     if (activeSection === "services") fetchServices();
     if (activeSection === "slider") fetchSliderImages();
-  }, [activeSection, isLoggedIn]);
+  }, [isLoggedIn, activeSection]);
 
-  // ------------- LOGIN UI -------------
+  // --------------------------
+  // LOGIN PAGE
+  // --------------------------
   if (!isLoggedIn) {
     return (
       <div className="admin-container">
         <h1>Admin Login</h1>
-        <form onSubmit={handleLogin} className="login-form">
-          <input
-            type="text"
-            placeholder="Username"
-            value={loginUsername}
-            onChange={(e) => setLoginUsername(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-          />
+        <form className="login-form" onSubmit={handleLogin}>
+          <input type="text" placeholder="Username" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
+          <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
           <button type="submit">Login</button>
         </form>
+        <p>Use <b>sm</b> / <b>sm123</b></p>
       </div>
     );
   }
 
-  // ========== MAIN DASHBOARD ==========
+  // --------------------------
+  // MAIN ADMIN UI
+  // --------------------------
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -220,43 +225,64 @@ function Admin() {
       {/* MENU */}
       {!activeSection && (
         <div className="admin-menu">
-          <button onClick={() => setActiveSection("inquiries")}>
-            📋 Manage Inquiries
-          </button>
-          <button onClick={() => setActiveSection("services")}>
-            🛠 Manage Services
-          </button>
-          <button onClick={() => setActiveSection("slider")}>
-            🖼 Manage Slider Images
-          </button>
+          <button onClick={() => setActiveSection("inquiries")}>📋 Inquiries</button>
+          <button onClick={() => setActiveSection("services")}>🛠 Services</button>
+          <button onClick={() => setActiveSection("slider")}>🖼 Slider Images</button>
         </div>
       )}
 
-      {/* ---------- INQUIRIES SECTION ---------- */}
-      {activeSection === "inquiries" && (
+      {/* SLIDER SECTION */}
+      {activeSection === "slider" && (
         <div>
-          <h2>Inquiries</h2>
+          <h2>Slider Images</h2>
           <button onClick={() => setActiveSection(null)}>⬅ Back</button>
 
-          <input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div>
+            <input type="file" accept="image/*" onChange={(e) => setSliderFile(e.target.files[0])} />
+            <button onClick={uploadSliderImage}>Upload</button>
+          </div>
 
-          <table className="admin-table">
+          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "20px" }}>
+            {sliderImages.map((img) => (
+              <div key={img._id} style={{ position: "relative" }}>
+                <img src={img.url} width="160" height="120" style={{ borderRadius: "8px", objectFit: "cover" }} />
+                <button
+                  onClick={() => deleteSliderImage(img._id)}
+                  style={{
+                    position: "absolute",
+                    top: "-10px",
+                    right: "-10px",
+                    background: "red",
+                    color: "white",
+                    borderRadius: "50%",
+                    border: "none",
+                    height: "26px",
+                    width: "26px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* INQUIRIES SECTION */}
+      {activeSection === "inquiries" && (
+        <div>
+          <h2>Manage Inquiries</h2>
+          <button onClick={() => setActiveSection(null)}>⬅ Back</button>
+
+          <input type="text" placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
+
+          <table border="1" cellPadding="10">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Mobile</th>
-                <th>Message</th>
-                <th>Date</th>
-                <th>Delete</th>
+                <th>Name</th><th>Email</th><th>Mobile</th><th>Message</th><th>Date</th><th>Action</th>
               </tr>
             </thead>
-
             <tbody>
               {inquiries.map((inq) => (
                 <tr key={inq._id}>
@@ -265,11 +291,7 @@ function Admin() {
                   <td>{inq.mobile}</td>
                   <td>{inq.message}</td>
                   <td>{new Date(inq.date).toLocaleString()}</td>
-                  <td>
-                    <button onClick={() => deleteInquiry(inq._id)}>
-                      Delete
-                    </button>
-                  </td>
+                  <td><button onClick={() => deleteInquiry(inq._id)}>Delete</button></td>
                 </tr>
               ))}
             </tbody>
@@ -277,73 +299,27 @@ function Admin() {
         </div>
       )}
 
-      {/* ---------- SERVICES SECTION ---------- */}
+      {/* SERVICES SECTION */}
       {activeSection === "services" && (
         <div>
           <h2>Manage Services</h2>
           <button onClick={() => setActiveSection(null)}>⬅ Back</button>
 
-          <div className="service-form">
-            <input
-              type="text"
-              placeholder="Service Name"
-              value={serviceName}
-              onChange={(e) => setServiceName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Documents Required"
-              value={documents}
-              onChange={(e) => setDocuments(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Duration"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+          <input type="text" placeholder="Service Name" value={serviceName} onChange={(e) => setServiceName(e.target.value)} />
+          <input type="text" placeholder="Documents" value={documents} onChange={(e) => setDocuments(e.target.value)} />
+          <input type="text" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
+          <input type="text" placeholder="Duration" value={duration} onChange={(e) => setDuration(e.target.value)} />
+          <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <input type="file" accept="image/*" onChange={(e) => setServiceImageFile(e.target.files[0])} />
 
-            <input
-              type="text"
-              placeholder="Image URL (optional)"
-              value={imageURL}
-              onChange={(e) => setImageURL(e.target.value)}
-            />
+          <button onClick={addService}>Add Service</button>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setServiceImageFile(e.target.files[0])}
-            />
-
-            <button onClick={addService}>Add Service</button>
-          </div>
-
-          <table className="admin-table">
+          <table border="1" cellPadding="10">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Docs</th>
-                <th>Price</th>
-                <th>Duration</th>
-                <th>Description</th>
-                <th>Image</th>
-                <th>Delete</th>
+                <th>Name</th><th>Docs</th><th>Price</th><th>Duration</th><th>Description</th><th>Image</th><th>Action</th>
               </tr>
             </thead>
-
             <tbody>
               {services.map((s) => (
                 <tr key={s._id}>
@@ -352,16 +328,8 @@ function Admin() {
                   <td>{s.price}</td>
                   <td>{s.duration}</td>
                   <td>{s.description}</td>
-                  <td>
-                    {s.imageURL && (
-                      <img src={s.imageURL} alt="" width="50" />
-                    )}
-                  </td>
-                  <td>
-                    <button onClick={() => deleteService(s._id)}>
-                      Delete
-                    </button>
-                  </td>
+                  <td><img src={s.imageURL} width="60" /></td>
+                  <td><button onClick={() => deleteService(s._id)}>Delete</button></td>
                 </tr>
               ))}
             </tbody>
@@ -369,33 +337,6 @@ function Admin() {
         </div>
       )}
 
-      {/* ---------- SLIDER SECTION ---------- */}
-      {activeSection === "slider" && (
-        <div>
-          <h2>Manage Slider Images</h2>
-          <button onClick={() => setActiveSection(null)}>⬅ Back</button>
-
-          <div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSliderFile(e.target.files[0])}
-            />
-            <button onClick={uploadSliderImage}>Upload</button>
-          </div>
-
-          <div className="slider-grid">
-            {sliderImages.map((img) => (
-              <div key={img._id} className="slider-item">
-                <img src={img.url} width="180" height="120" />
-                <button onClick={() => deleteSliderImage(img._id)}>
-                  Delete
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
