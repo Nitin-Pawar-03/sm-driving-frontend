@@ -1,18 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import Admin from "./components/Admin";
-import Login from "./components/Login";
-import { AuthProvider, useAuth } from "./AuthContext";
-
-// Protected Route Component
-function ProtectedRoute({ children }) {
-  const { isLoggedIn } = useAuth();
-  return isLoggedIn ? children : <Navigate to="/login" />;
-}
+import { AuthProvider } from "./AuthContext";
 
 function App() {
   return (
@@ -23,15 +16,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
+          {/* Admin already contains its own login UI */}
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Footer />
       </Router>
